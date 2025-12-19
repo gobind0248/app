@@ -27,8 +27,8 @@ const TELEGRAM_CONFIG = {
 
 // Admin Notification Settings
 const ADMIN_CONFIG = {
-    NOTIFY_ON_LOGIN: true, // Set to true if admin wants notifications for their own login
-    NOTIFY_ON_QUIZ_RESULT: true // Set to true if admin wants notifications for their own quiz results
+    NOTIFY_ON_LOGIN: false, // Set to true if admin wants notifications for their own login
+    NOTIFY_ON_QUIZ_RESULT: false // Set to true if admin wants notifications for their own quiz results
 };
 
 // Logo configuration
