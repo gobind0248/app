@@ -1,18 +1,46 @@
 {
   "mathematics": {
-    "sheetId": "1a_DRmKbBQU5j6NWz-XYzkg0eqxOYIJalZYEkrozqZZs",
+    "sheetId": "YOUR_MATHEMATICS_SHEET_ID",
     "chapters": {
-      "1-Number System": "0",
-      "2-Polynomials": "1082366494",
-      "Mensuration": "987654321"
+      "1. Rational Numbers": "0",
+      "2. Linear Equations in One Variable": "100000000",
+      "3. Understanding Quadrilaterals": "200000000",
+      "4. Practical Geometry": "300000000",
+      "5. Data Handling": "400000000",
+      "6. Squares and Square Roots": "500000000",
+      "7. Cubes and Cube Roots": "600000000",
+      "8. Comparing Quantities": "700000000",
+      "9. Algebraic Expressions and Identities": "800000000",
+      "10. Visualising Solid Shapes": "900000000",
+      "11. Mensuration": "110000000",
+      "12. Exponents and Powers": "120000000",
+      "13. Direct and Inverse Proportions": "130000000",
+      "14. Factorisation": "140000000",
+      "15. Introduction to Graphs": "150000000",
+      "16. Playing with Numbers": "160000000"
     }
   },
   "science": {
-    "sheetId": "YOUR_SCIENCE_SHEET_ID_HERE",
+    "sheetId": "YOUR_SCIENCE_SHEET_ID",
     "chapters": {
-      "Physics": "0",
-      "Chemistry": "111111111",
-      "Biology": "222222222"
+      "1. Crop Production and Management": "0",
+      "2. Microorganisms: Friend and Foe": "210000000",
+      "3. Synthetic Fibres and Plastics": "220000000",
+      "4. Materials: Metals and Non-Metals": "230000000",
+      "5. Coal and Petroleum": "240000000",
+      "6. Combustion and Flame": "250000000",
+      "7. Conservation of Plants and Animals": "260000000",
+      "8. Cell - Structure and Functions": "270000000",
+      "9. Reproduction in Animals": "280000000",
+      "10. Reaching the Age of Adolescence": "290000000",
+      "11. Force and Pressure": "310000000",
+      "12. Friction": "320000000",
+      "13. Sound": "330000000",
+      "14. Chemical Effects of Electric Current": "340000000",
+      "15. Some Natural Phenomena": "350000000",
+      "16. Light": "360000000",
+      "17. Stars and the Solar System": "370000000",
+      "18. Pollution of Air and Water": "380000000"
     }
   }
 }
