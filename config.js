@@ -7,8 +7,8 @@ const GOOGLE_SHEETS_CONFIG = {
 // Telegram Configuration (WhatsApp removed)
 const TELEGRAM_CONFIG = {
     ENABLED: true, // Set to false to completely disable
-    BOT_TOKEN: '83559038htutytyTEmzBjqthB8Q',
-    CHAT_ID: '59076vghh',
+    BOT_TOKEN: '8355903870:AAHLCnFWPwwzk7Q22gpvV8ITEmzBjqthB8Q',
+    CHAT_ID: '5903174042',
     MESSAGE_TEMPLATE: {
         LOGIN: "🔔 *New User Login* 🔔\n👤 Username: {username}\n🎓 Name: {name}\n🏫 Class: {class}\n👥 Role: {role}\n📅 Date: {date}\n⏰ Time: {time}\n🌐 IP: {ip}",
         QUIZ_RESULT: "📊 *Quiz Result* 📊\n👤 Username: {username}\n🎓 Name: {name}\n🏫 Class: {class}\n📚 Subject: {subject}\n📖 Chapter: {chapter}\n✅ Correct: {correct}\n📋 Total: {total}\n🔷 Attempted: {attempted}\n📈 Score: {percentage}%\n⏱️ Time Taken: {timeTaken}\n📅 Date: {date}"
