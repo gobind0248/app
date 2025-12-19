@@ -1,0 +1,18 @@
+{
+  "mathematics": {
+    "sheetId": "YOUR_MATHS_SHEET_ID_HERE",
+    "chapters": {
+      "Algebra": "0",
+      "Geometry": "123456789",
+      "Mensuration": "987654321"
+    }
+  },
+  "science": {
+    "sheetId": "YOUR_SCIENCE_SHEET_ID_HERE",
+    "chapters": {
+      "Physics": "0",
+      "Chemistry": "111111111",
+      "Biology": "222222222"
+    }
+  }
+}
