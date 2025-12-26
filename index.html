@@ -1854,7 +1854,7 @@
         CHAT_ID: '',
         MESSAGE_TEMPLATE: {
             LOGIN: "━━━━ 🔴 *User Login* 🔴 ━━━━\n\n🟠 Name: {name}\n🟠 Username: {username}\n🟠 Class: {class}\n🟠 Role: {role}\n\n📅 Date: {date}\n⏰ Time: {time}\n\n🌐 IP: {ip}",
-            QUIZ_RESULT: "━━━━ 🟠 *Quiz Result* 🟠 ━━━━\n\n🟢 Name: {name}\n🟢 Username: {username}\n🟢 Class: {class}\n🟢 Subject: {subject}\n\n📖 Ch: {chapter}\n📋 Total Marks: {total}\n📝 Attempted: {attempted}\n✅ Correct: {correct} out of {attempted}\n\n⏱️ Time Taken: {timeTaken}\n📈 Percentage: {percentage}%\n\n📅 Date: {date}"
+            QUIZ_RESULT: "━━━━ 🟠 *Quiz Result* 🟠 ━━━━\n\n🟢 Name: {name}\n🟢 Username: {username}\n🟢 Class: {class}\n🟢 Subject: {subject}\n\n📖 Ch: {chapter}\n📋 Total Marks: {total}\n📝 Attempted: {attempted}\n✅ Correct: {correct} out of {attempted}\n\n⏱️ Time Taken: {timeTaken}\n📈 Percentage: {percentage}%\n\n⏰ Time: {time}\n📅 Date: {date}"
         }
     };
     
@@ -2332,6 +2332,7 @@
             .replace('{percentage}', stats.percentage)
             .replace('{attempted}', stats.attempted) // Added attempted count
             .replace('{timeTaken}', stats.timeTaken || "N/A")
+          .replace('{time}', time)
             .replace('{date}', date);
         
         console.log("📊 Quiz Result Notification:", message);
@@ -3645,7 +3646,7 @@
         }
       }
       
-      const percentage = questions.length > 0 ? ((correct / attempted.length) * 100).toFixed(2) : 0;
+      const percentage = questions.length > 0 ? ((correct / questions.length) * 100).toFixed(2) : 0;
       
       return {
         total: questions.length,
