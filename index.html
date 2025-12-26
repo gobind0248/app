@@ -1838,6 +1838,7 @@
         }
     };
     
+    // WhatsApp notifications removed
     let WHATSAPP_CONFIG = {
         ENABLED: false,
         PHONE_NUMBER: '',
@@ -1853,7 +1854,7 @@
         CHAT_ID: '',
         MESSAGE_TEMPLATE: {
             LOGIN: "🔔 *New User Login* 🔔\n👤 Username: {username}\n📛 Name: {name}\n🏫 Class: {class}\n👥 Role: {role}\n📅 Date: {date}\n⏰ Time: {time}\n🌐 IP: {ip}",
-            QUIZ_RESULT: "📊 *Quiz Result* 📊\n👤 Username: {username}\n📛 Name: {name}\n🏫 Class: {class}\n📚 Subject: {subject}\n📖 Chapter: {chapter}\n✅ Correct: {correct}\n📋 Total: {total}\n📈 Score: {percentage}%\n⏱️ Time: {timeTaken}\n📅 Date: {date}"
+            QUIZ_RESULT: "📊 *Quiz Result* 📊\n👤 Username: {username}\n📛 Name: {name}\n🏫 Class: {class}\n📚 Subject: {subject}\n📖 Chapter: {chapter}\n✅ Correct: {correct}\n📋 Total: {total}\n📈 Score: {percentage}%\n📝 Attempted: {attempted}\n⏱️ Time: {timeTaken}\n📅 Date: {date}"
         }
     };
     
@@ -1909,6 +1910,11 @@
     // Logging variables
     let userIP = 'Unknown';
     let currentQuizStats = null;
+    
+    // Notification tracking - to prevent duplicate notifications
+    let hasSentLoginNotification = false;
+    let hasSentQuizResultNotification = false;
+    let currentQuizSessionId = null;
 
     // ========== DOM ELEMENTS ==========
     const fixedHeaderEl = document.querySelector(".fixed-header");
@@ -1968,6 +1974,43 @@
     const preloadStatusEl = document.getElementById("preload-status");
     const preloadCountEl = document.getElementById("preload-count");
 
+    // ========== PERSISTENT SESSION MANAGEMENT ==========
+    function saveSession() {
+        if (currentUser) {
+            const sessionData = {
+                user: currentUser,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('gs_tutorial_session', JSON.stringify(sessionData));
+        }
+    }
+
+    function loadSession() {
+        const sessionData = localStorage.getItem('gs_tutorial_session');
+        if (sessionData) {
+            try {
+                const data = JSON.parse(sessionData);
+                const sessionAge = Date.now() - data.timestamp;
+                
+                // Check if session is still valid (24 hours max)
+                if (sessionAge < 24 * 60 * 60 * 1000) {
+                    currentUser = data.user;
+                    return true;
+                } else {
+                    // Session expired
+                    localStorage.removeItem('gs_tutorial_session');
+                }
+            } catch (e) {
+                localStorage.removeItem('gs_tutorial_session');
+            }
+        }
+        return false;
+    }
+
+    function clearSession() {
+        localStorage.removeItem('gs_tutorial_session');
+    }
+
     // ========== LOAD EXTERNAL CONFIGURATIONS ==========
     async function loadConfigurations() {
         try {
@@ -1983,16 +2026,6 @@
                 GOOGLE_SHEETS_CONFIG.SHEET_ID = sheetsMatch[1];
                 GOOGLE_SHEETS_CONFIG.GID = gidMatch[1];
                 console.log("✅ Loaded Google Sheets config:", GOOGLE_SHEETS_CONFIG.SHEET_ID);
-            }
-            
-            // Load WhatsApp config
-            const whatsappEnabledMatch = configText.match(/ENABLED:\s*(true|false)/);
-            const phoneMatch = configText.match(/PHONE_NUMBER:\s*'([^']+)'/);
-            
-            if (whatsappEnabledMatch && phoneMatch) {
-                WHATSAPP_CONFIG.ENABLED = whatsappEnabledMatch[1] === 'true';
-                WHATSAPP_CONFIG.PHONE_NUMBER = phoneMatch[1];
-                console.log("✅ WhatsApp notifications:", WHATSAPP_CONFIG.ENABLED ? "Enabled" : "Disabled");
             }
             
             // Load Telegram config
@@ -2229,8 +2262,14 @@
       }
     }
 
-    // ========== NOTIFICATION FUNCTIONS ==========
+    // ========== TELEGRAM NOTIFICATION FUNCTIONS ==========
     async function sendLoginNotification(user) {
+        // Only send notification if user actively logged in (not on page refresh)
+        if (hasSentLoginNotification) {
+            console.log("🔕 Login notification already sent for this session");
+            return;
+        }
+        
         // Check admin notifications
         if (user.role === 'Admin') {
             if (!ADMIN_CONFIG.NOTIFY_ON_LOGIN) {
@@ -2239,13 +2278,13 @@
             }
         }
         
-        if (!WHATSAPP_CONFIG.ENABLED && !TELEGRAM_CONFIG.ENABLED) return;
+        if (!TELEGRAM_CONFIG.ENABLED) return;
         
         const now = new Date();
         const date = now.toLocaleDateString('en-IN');
         const time = now.toLocaleTimeString('en-IN');
         
-        const message = WHATSAPP_CONFIG.MESSAGE_TEMPLATE.LOGIN
+        const message = TELEGRAM_CONFIG.MESSAGE_TEMPLATE.LOGIN
             .replace('{username}', user.username)
             .replace('{name}', user.name)
             .replace('{class}', user.class || 'Not assigned')
@@ -2256,18 +2295,18 @@
         
         console.log("📱 Login Notification:", message);
         
-        // Send to WhatsApp
-        if (WHATSAPP_CONFIG.ENABLED && WHATSAPP_CONFIG.PHONE_NUMBER) {
-            await sendWhatsAppMessage(message);
-        }
-        
         // Send to Telegram
-        if (TELEGRAM_CONFIG.ENABLED && TELEGRAM_CONFIG.BOT_TOKEN) {
-            await sendTelegramMessage(message);
-        }
+        await sendTelegramMessage(message);
+        hasSentLoginNotification = true;
     }
 
     async function sendQuizResultNotification(stats) {
+        // Prevent duplicate notifications for same quiz
+        if (hasSentQuizResultNotification) {
+            console.log("🔕 Quiz result notification already sent for this quiz");
+            return;
+        }
+        
         // Check admin notifications
         if (currentUser.role === 'Admin') {
             if (!ADMIN_CONFIG.NOTIFY_ON_QUIZ_RESULT) {
@@ -2276,13 +2315,13 @@
             }
         }
         
-        if (!WHATSAPP_CONFIG.ENABLED && !TELEGRAM_CONFIG.ENABLED) return;
+        if (!TELEGRAM_CONFIG.ENABLED) return;
         if (!currentUser || !currentQuizStats) return;
         
         const now = new Date();
         const date = now.toLocaleDateString('en-IN');
         
-        const message = WHATSAPP_CONFIG.MESSAGE_TEMPLATE.QUIZ_RESULT
+        const message = TELEGRAM_CONFIG.MESSAGE_TEMPLATE.QUIZ_RESULT
             .replace('{username}', currentUser.username)
             .replace('{name}', currentUser.name)
             .replace('{class}', currentClass)
@@ -2291,42 +2330,15 @@
             .replace('{correct}', stats.correct)
             .replace('{total}', stats.total)
             .replace('{percentage}', stats.percentage)
+            .replace('{attempted}', stats.attempted) // Added attempted count
             .replace('{timeTaken}', stats.timeTaken || "N/A")
             .replace('{date}', date);
         
         console.log("📊 Quiz Result Notification:", message);
         
-        // Send to WhatsApp
-        if (WHATSAPP_CONFIG.ENABLED && WHATSAPP_CONFIG.PHONE_NUMBER) {
-            await sendWhatsAppMessage(message);
-        }
-        
         // Send to Telegram
-        if (TELEGRAM_CONFIG.ENABLED && TELEGRAM_CONFIG.BOT_TOKEN) {
-            await sendTelegramMessage(message);
-        }
-    }
-
-    async function sendWhatsAppMessage(message) {
-        try {
-            const phone = WHATSAPP_CONFIG.PHONE_NUMBER;
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-            
-            // Create invisible iframe to trigger WhatsApp
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = whatsappUrl;
-            document.body.appendChild(iframe);
-            
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 1000);
-            
-            console.log("✅ WhatsApp notification sent");
-        } catch (error) {
-            console.error("❌ Error sending WhatsApp message:", error);
-        }
+        await sendTelegramMessage(message);
+        hasSentQuizResultNotification = true;
     }
 
     async function sendTelegramMessage(message) {
@@ -2527,7 +2539,7 @@
       return user;
     }
 
-    function login(user) {
+    function login(user, isRestore = false) {
       currentUser = user;
       headerUsernameEl.textContent = user.name;
       
@@ -2547,8 +2559,13 @@
       // Load available classes
       loadClasses();
       
-      // Send login notification
-      sendLoginNotification(user);
+      // Save session to localStorage
+      saveSession();
+      
+      // Send login notification only if actively logged in (not restored from session)
+      if (!isRestore) {
+        sendLoginNotification(user);
+      }
       
       console.log(`🎉 User ${user.name} logged in successfully. Role: ${user.role}, Class: ${user.class || '8'}`);
     }
@@ -2573,6 +2590,14 @@
         
         // Clear image cache
         imageCache.clear();
+        
+        // Clear session
+        clearSession();
+        
+        // Reset notification flags
+        hasSentLoginNotification = false;
+        hasSentQuizResultNotification = false;
+        currentQuizSessionId = null;
         
         // Remove activity listeners
         document.removeEventListener('mousemove', resetInactivityTimer);
@@ -2900,6 +2925,10 @@
       currentTopicName = "";
       quizStartTime = null;
       isReviewMode = false;
+      
+      // Reset notification flag for new quiz
+      hasSentQuizResultNotification = false;
+      currentQuizSessionId = Date.now().toString(); // New session ID
       
       // Reset UI
       questionTextEl.textContent = "Please select a chapter to start.";
@@ -3662,6 +3691,7 @@
         performanceMessage = "📖 Needs improvement. Study the chapter thoroughly.";
       }
       
+      // Send quiz result notification (only once per quiz)
       sendQuizResultNotification(currentQuizStats);
       
       let reviewSection = '';
@@ -3726,11 +3756,94 @@
       finishBtn.style.display = "inline-block";
       finishBtn.textContent = "Back to Results";
       finishBtn.onclick = () => {
-        showFinalResult();
+        // Don't send notification again when going back to results
+        showFinalResultWithoutNotification();
       };
       
       currentIndex = 0;
       renderQuestion();
+    }
+
+    function showFinalResultWithoutNotification() {
+      stopTimer();
+      removeTimerNotification();
+      
+      const stats = calculateQuizStats();
+      const timeTaken = formatTimeTaken();
+      
+      progressBarFillEl.style.width = "100%";
+      questionTextEl.textContent = "Quiz Completed!";
+      questionImageContainerEl.classList.remove('visible');
+      optionsListEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      nextBtn.style.display = "none";
+      previousBtn.style.display = "none";
+      finishBtn.style.display = "none";
+      finalScoreEl.style.display = "block";
+      
+      let performanceMessage = "";
+      if (stats.percentage >= 80) {
+        performanceMessage = "🎉 Excellent! Outstanding performance!";
+      } else if (stats.percentage >= 60) {
+        performanceMessage = "👍 Good job! Keep practicing!";
+      } else if (stats.percentage >= 40) {
+        performanceMessage = "📚 Keep learning! Review the chapter again.";
+      } else {
+        performanceMessage = "📖 Needs improvement. Study the chapter thoroughly.";
+      }
+      
+      let reviewSection = '';
+      if (questions.length > 0) {
+        reviewSection = `
+          <div class="result-summary" style="margin-top: 20px;">
+            <button class="review-btn" onclick="showQuestionReview()">
+              📖 Review Questions with Explanations
+            </button>
+          </div>
+        `;
+      }
+      
+      finalScoreEl.innerHTML = `
+        <div class="result-header">Results - ${currentTopicName}</div>
+        <div class="result-stats">
+          <div class="stat-item">
+            <div class="stat-label">Total Questions</div>
+            <div class="stat-value">${stats.total}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Attempted</div>
+            <div class="stat-value">${stats.attempted}/${stats.total}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Correct Answers</div>
+            <div class="stat-value">${stats.correct}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Score Percentage</div>
+            <div class="stat-value stat-percentage">${stats.percentage}%</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Time Taken</div>
+            <div class="stat-value stat-time">${timeTaken || "No timer set"}</div>
+          </div>
+          ${timerDuration > 0 ? `
+          <div class="stat-item">
+            <div class="stat-label">Time Limit</div>
+            <div class="stat-value">${Math.floor(timerDuration / (1000 * 60))} minutes</div>
+          </div>
+          ` : ''}
+        </div>
+        <div class="result-message">
+          ${performanceMessage}
+        </div>
+        <div class="result-summary">
+          <em>Select another chapter from the dropdown above to start a new quiz.</em>
+        </div>
+        <button class="restart-btn" onclick="restartQuiz()">Restart</button>
+        ${reviewSection}
+      `;
+      
+      resetInactivityTimer();
     }
 
     function restartQuiz() {
@@ -3752,6 +3865,10 @@
         resetInactivityTimer();
       };
       finalScoreEl.style.display = "none";
+      
+      // Reset notification flag for new quiz attempt
+      hasSentQuizResultNotification = false;
+      currentQuizSessionId = Date.now().toString();
       
       if (timerDuration > 0) {
         showTimerNotification();
@@ -3802,7 +3919,7 @@
         
         if (user) {
           resetFailedAttempts();
-          login(user);
+          login(user, false); // false = not a restore, send notification
         } else {
           recordFailedAttempt();
           
@@ -3837,6 +3954,9 @@
       }
       
       removeTimerNotification();
+      
+      // Reset quiz state for fresh start
+      resetQuizState();
       
       loadQuestionsFromGoogleSheet(dropdownVal);
       resetInactivityTimer();
@@ -3873,7 +3993,17 @@
     async function initializeApp() {
       await loadConfigurations();
       
-      usernameEl.focus();
+      // Try to restore session from localStorage
+      const hasSession = loadSession();
+      if (hasSession) {
+        // Restore user session (don't send login notification)
+        login(currentUser, true);
+        console.log("🔄 Session restored from localStorage");
+      } else {
+        // No session, show login
+        usernameEl.focus();
+      }
+      
       console.log("🚀 G. S. Tutorial App initialized");
       console.log("📊 Configuration loaded successfully");
       console.log("🔐 Google Sheets Login System Ready");
@@ -3881,11 +4011,11 @@
       
       console.log("📋 Current Configuration:");
       console.log("- Google Sheets ID:", GOOGLE_SHEETS_CONFIG.SHEET_ID);
-      console.log("- WhatsApp Enabled:", WHATSAPP_CONFIG.ENABLED);
       console.log("- Telegram Enabled:", TELEGRAM_CONFIG.ENABLED);
       console.log("- Admin Login Notifications:", ADMIN_CONFIG.NOTIFY_ON_LOGIN);
       console.log("- Admin Quiz Notifications:", ADMIN_CONFIG.NOTIFY_ON_QUIZ_RESULT);
       console.log("- Classes Loaded:", CLASSES_CONFIG.length);
+      console.log("- Session Persistence: Enabled");
       
       document.addEventListener('mousemove', resetInactivityTimer);
       document.addEventListener('keypress', resetInactivityTimer);
