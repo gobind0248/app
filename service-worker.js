@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gs-tutorial-v3.6';
+const CACHE_NAME = 'gs-tutorial-v1.0.0';
 const urlsToCache = [
   '/',
   '/index.html',
