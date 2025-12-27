@@ -898,114 +898,6 @@
       gap: 8px;
     }
 
-    /* AUTO-LOGOUT WARNING MODAL */
-    .auto-logout-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(2, 6, 23, 0.95);
-      backdrop-filter: blur(10px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      padding: 20px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .auto-logout-content {
-      background: #020617;
-      border-radius: 20px;
-      padding: 30px;
-      max-width: 500px;
-      width: 100%;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
-      border: 2px solid rgba(239, 68, 68, 0.3);
-      text-align: center;
-      animation: slideUp 0.4s ease;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .auto-logout-icon {
-      font-size: 4rem;
-      margin-bottom: 20px;
-      color: #ef4444;
-      animation: pulse 1.5s infinite;
-    }
-
-    .auto-logout-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #fca5a5;
-      margin-bottom: 10px;
-      background: linear-gradient(90deg, #ef4444 0%, #f97373 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .auto-logout-message {
-      font-size: 1rem;
-      color: #e5e7eb;
-      margin-bottom: 25px;
-      line-height: 1.5;
-    }
-
-    .auto-logout-countdown {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #fbbf24;
-      margin: 20px 0;
-      font-family: 'Courier New', monospace;
-      letter-spacing: 2px;
-      animation: pulse 1s infinite;
-    }
-
-    .auto-logout-buttons {
-      display: flex;
-      gap: 15px;
-      margin-top: 30px;
-    }
-
-    .auto-logout-btn {
-      flex: 1;
-      padding: 15px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: none;
-    }
-
-    .auto-logout-ok {
-      background: linear-gradient(to right, #ef4444, #dc2626);
-      color: white;
-      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
-    }
-
-    .auto-logout-ok:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 25px rgba(239, 68, 68, 0.5);
-    }
-
-    .auto-logout-cancel {
-      background: linear-gradient(to right, #3b82f6, #2563eb);
-      color: white;
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-    }
-
-    .auto-logout-cancel:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5);
-    }
-
     /* QUESTION BOX */
     .question-box {
       background: rgba(15, 23, 42, 0.7);
@@ -1635,31 +1527,6 @@
       .question-image {
         max-height: 35vh;
       }
-      
-      /* Auto logout modal mobile */
-      .auto-logout-content {
-        padding: 20px;
-      }
-      
-      .auto-logout-icon {
-        font-size: 3rem;
-      }
-      
-      .auto-logout-title {
-        font-size: 1.5rem;
-      }
-      
-      .auto-logout-countdown {
-        font-size: 2rem;
-      }
-      
-      .auto-logout-buttons {
-        flex-direction: column;
-      }
-      
-      .auto-logout-btn {
-        padding: 12px;
-      }
     }
 
     @media (min-width: 701px) {
@@ -1774,29 +1641,6 @@
   </style>
 </head>
 <body>
-  <!-- Auto Logout Warning Modal -->
-  <div id="auto-logout-modal" class="auto-logout-modal">
-    <div class="auto-logout-content">
-      <div class="auto-logout-icon">⏰</div>
-      <div class="auto-logout-title">Inactivity Warning</div>
-      <div class="auto-logout-message">
-        You have been inactive for 10 minutes. For security reasons, you will be automatically logged out in:
-      </div>
-      <div id="auto-logout-countdown" class="auto-logout-countdown">10</div>
-      <div class="auto-logout-message">
-        Click <strong>"Stay Logged In"</strong> to continue your session, or <strong>"Logout Now"</strong> to logout immediately.
-      </div>
-      <div class="auto-logout-buttons">
-        <button class="auto-logout-btn auto-logout-cancel" id="cancel-auto-logout">
-          Stay Logged In
-        </button>
-        <button class="auto-logout-btn auto-logout-ok" id="confirm-auto-logout">
-          Logout Now
-        </button>
-      </div>
-    </div>
-  </div>
-  
   <!-- Image Preloading Overlay -->
   <div id="preload-overlay" class="preload-indicator">
     <div style="font-size: 1.5rem; color: #60a5fa; margin-bottom: 20px;">🖼️ Loading Images...</div>
@@ -2047,15 +1891,8 @@
     // Login system variables
     let currentUser = null;
     let userList = [];
-    
-    // Auto-logout variables (MODIFIED)
     let inactivityTimer = null;
-    let autoLogoutWarningTimer = null;
-    let autoLogoutCountdownTimer = null;
-    const INACTIVITY_WARNING_TIME = 10 * 60 * 1000; // 10 minutes (was 15)
-    const AUTO_LOGOUT_COUNTDOWN_TIME = 10; // 10 seconds countdown
-    let lastActivityTime = Date.now();
-    let isAutoLogoutWarningShown = false;
+    const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes for ALL inactivity
     
     // Login attempt tracking variables
     let failedAttempts = 0;
@@ -2131,12 +1968,6 @@
     const scoreMiniEl = document.getElementById("score-mini");
     const finalScoreEl = document.getElementById("final-score");
     
-    // Auto-logout modal elements (NEW)
-    const autoLogoutModalEl = document.getElementById("auto-logout-modal");
-    const autoLogoutCountdownEl = document.getElementById("auto-logout-countdown");
-    const cancelAutoLogoutBtn = document.getElementById("cancel-auto-logout");
-    const confirmAutoLogoutBtn = document.getElementById("confirm-auto-logout");
-    
     // Preloading elements
     const preloadOverlayEl = document.getElementById("preload-overlay");
     const preloadProgressFillEl = document.getElementById("preload-progress-fill");
@@ -2178,108 +2009,6 @@
 
     function clearSession() {
         localStorage.removeItem('gs_tutorial_session');
-    }
-
-    // ========== AUTO-LOGOUT SYSTEM (MODIFIED) ==========
-    function resetInactivityTimer() {
-        // Update last activity time
-        lastActivityTime = Date.now();
-        
-        // Clear existing timers
-        if (inactivityTimer) {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = null;
-        }
-        
-        if (autoLogoutWarningTimer) {
-            clearTimeout(autoLogoutWarningTimer);
-            autoLogoutWarningTimer = null;
-        }
-        
-        // Clear countdown timer
-        if (autoLogoutCountdownTimer) {
-            clearInterval(autoLogoutCountdownTimer);
-            autoLogoutCountdownTimer = null;
-        }
-        
-        // Hide warning modal if it's shown
-        if (isAutoLogoutWarningShown) {
-            hideAutoLogoutWarning();
-        }
-        
-        // Only set inactivity timer if user is logged in
-        if (currentUser) {
-            // Set timer for warning (10 minutes)
-            autoLogoutWarningTimer = setTimeout(showAutoLogoutWarning, INACTIVITY_WARNING_TIME);
-            
-            // Set main inactivity timer (10 minutes + 10 seconds countdown)
-            inactivityTimer = setTimeout(autoLogout, INACTIVITY_WARNING_TIME + (AUTO_LOGOUT_COUNTDOWN_TIME * 1000));
-        }
-    }
-
-    function showAutoLogoutWarning() {
-        if (!currentUser || isAutoLogoutWarningShown) return;
-        
-        isAutoLogoutWarningShown = true;
-        
-        // Show modal
-        autoLogoutModalEl.style.display = 'flex';
-        
-        // Start countdown
-        let countdown = AUTO_LOGOUT_COUNTDOWN_TIME;
-        autoLogoutCountdownEl.textContent = countdown;
-        
-        autoLogoutCountdownTimer = setInterval(() => {
-            countdown--;
-            autoLogoutCountdownEl.textContent = countdown;
-            
-            if (countdown <= 0) {
-                // Time's up - auto logout
-                clearInterval(autoLogoutCountdownTimer);
-                performAutoLogout();
-            }
-        }, 1000);
-    }
-
-    function hideAutoLogoutWarning() {
-        isAutoLogoutWarningShown = false;
-        autoLogoutModalEl.style.display = 'none';
-        
-        if (autoLogoutCountdownTimer) {
-            clearInterval(autoLogoutCountdownTimer);
-            autoLogoutCountdownTimer = null;
-        }
-    }
-
-    function performAutoLogout() {
-        // Clear all timers
-        if (inactivityTimer) {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = null;
-        }
-        
-        if (autoLogoutWarningTimer) {
-            clearTimeout(autoLogoutWarningTimer);
-            autoLogoutWarningTimer = null;
-        }
-        
-        if (autoLogoutCountdownTimer) {
-            clearInterval(autoLogoutCountdownTimer);
-            autoLogoutCountdownTimer = null;
-        }
-        
-        // Hide modal
-        hideAutoLogoutWarning();
-        
-        // Perform logout
-        if (currentUser) {
-            alert("You have been automatically logged out due to inactivity (10 minutes).");
-            logout();
-        }
-    }
-
-    function autoLogout() {
-        performAutoLogout();
     }
 
     // ========== LOAD EXTERNAL CONFIGURATIONS ==========
@@ -2842,75 +2571,78 @@
     }
 
     function logout() {
-      if (confirm("Are you sure you want to logout?")) {
-        // Clear all timers
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
-        
-        if (inactivityTimer) {
-          clearTimeout(inactivityTimer);
-          inactivityTimer = null;
-        }
-        
-        if (autoLogoutWarningTimer) {
-          clearTimeout(autoLogoutWarningTimer);
-          autoLogoutWarningTimer = null;
-        }
-        
-        if (autoLogoutCountdownTimer) {
-          clearInterval(autoLogoutCountdownTimer);
-          autoLogoutCountdownTimer = null;
-        }
-        
-        if (cooldownTimer) {
-          clearInterval(cooldownTimer);
-          cooldownTimer = null;
-        }
-        
-        // Clear image cache
-        imageCache.clear();
-        
-        // Clear session
-        clearSession();
-        
-        // Reset notification flags
-        hasSentLoginNotification = false;
-        hasSentQuizResultNotification = false;
-        currentQuizSessionId = null;
-        
-        // Remove activity listeners
-        document.removeEventListener('mousemove', resetInactivityTimer);
-        document.removeEventListener('keypress', resetInactivityTimer);
-        document.removeEventListener('click', resetInactivityTimer);
-        
-        // Reset state
-        resetQuizState();
-        resetFailedAttempts();
-        
-        // Clear current user
-        currentUser = null;
-        
-        // Hide everything, show login
-        fixedHeaderEl.style.display = "none";
-        classSelectionEl.style.display = "none";
-        subjectSelectionEl.style.display = "none";
-        quizContainerEl.style.display = "none";
-        loginContainerEl.style.display = "flex";
-        
-        // Clear login form
-        loginFormEl.reset();
-        passwordEl.type = 'password';
-        passwordToggleEl.textContent = '👁️';
-        loginErrorEl.textContent = "";
-        loginErrorEl.style.display = "none";
-        
-        // Focus on username field
-        usernameEl.focus();
-        
-        console.log("👋 User logged out");
+      // Clear all timers
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
       }
+      
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+      }
+      
+      if (cooldownTimer) {
+        clearInterval(cooldownTimer);
+        cooldownTimer = null;
+      }
+      
+      // Clear image cache
+      imageCache.clear();
+      
+      // Clear session
+      clearSession();
+      
+      // Reset notification flags
+      hasSentLoginNotification = false;
+      hasSentQuizResultNotification = false;
+      currentQuizSessionId = null;
+      
+      // Remove activity listeners
+      document.removeEventListener('mousemove', resetInactivityTimer);
+      document.removeEventListener('keypress', resetInactivityTimer);
+      document.removeEventListener('click', resetInactivityTimer);
+      
+      // Reset state
+      resetQuizState();
+      resetFailedAttempts();
+      
+      // Clear current user
+      currentUser = null;
+      
+      // Hide everything, show login
+      fixedHeaderEl.style.display = "none";
+      classSelectionEl.style.display = "none";
+      subjectSelectionEl.style.display = "none";
+      quizContainerEl.style.display = "none";
+      loginContainerEl.style.display = "flex";
+      
+      // Clear login form
+      loginFormEl.reset();
+      passwordEl.type = 'password';
+      passwordToggleEl.textContent = '👁️';
+      loginErrorEl.textContent = "";
+      loginErrorEl.style.display = "none";
+      
+      // Focus on username field
+      usernameEl.focus();
+      
+      console.log("👋 User logged out");
+    }
+
+    function autoLogout() {
+      if (currentUser) {
+        alert("You have been automatically logged out due to inactivity (10 minutes).");
+        logout();
+      }
+    }
+
+    // ========== INACTIVITY TIMER FUNCTIONS ==========
+    function resetInactivityTimer() {
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      inactivityTimer = setTimeout(autoLogout, INACTIVITY_TIMEOUT);
     }
 
     // ========== NAVIGATION FUNCTIONS ==========
@@ -2920,6 +2652,7 @@
       quizContainerEl.style.display = "none";
       resetQuizState();
       isReviewMode = false;
+      resetInactivityTimer();
     }
 
     function showSubjectSelection(className) {
@@ -2932,6 +2665,7 @@
       
       loadSubjects();
       isReviewMode = false;
+      resetInactivityTimer();
     }
 
     function showQuizContainer(subjectName) {
@@ -2952,6 +2686,7 @@
       
       loadChapters();
       isReviewMode = false;
+      resetInactivityTimer();
     }
 
     function loadClasses() {
@@ -3724,6 +3459,9 @@
         li.addEventListener("click", () => {
           if (hasAnswered || isReviewMode) return;
           
+          // Reset inactivity timer on any quiz interaction
+          resetInactivityTimer();
+          
           // Remove selected class from all options
           document.querySelectorAll(".option").forEach(optEl => {
             optEl.classList.remove("selected");
@@ -3736,7 +3474,6 @@
           
           // Handle option click (shows explanation)
           handleOptionClick(idx);
-          resetInactivityTimer();
         });
       });
 
@@ -3876,6 +3613,9 @@
     }
 
     function goToNextQuestion() {
+      // Reset inactivity timer on any quiz interaction
+      resetInactivityTimer();
+      
       currentIndex++;
       if (currentIndex < questions.length) {
         renderQuestion();
@@ -3888,15 +3628,16 @@
           renderQuestion();
         }
       }
-      resetInactivityTimer();
     }
 
     function goToPreviousQuestion() {
+      // Reset inactivity timer on any quiz interaction
+      resetInactivityTimer();
+      
       if (currentIndex > 0) {
         currentIndex--;
         renderQuestion();
       }
-      resetInactivityTimer();
     }
 
     function calculateQuizStats() {
@@ -4212,18 +3953,6 @@
       resetInactivityTimer();
     });
 
-    // Auto-logout button event listeners (NEW)
-    cancelAutoLogoutBtn.addEventListener("click", () => {
-      hideAutoLogoutWarning();
-      resetInactivityTimer();
-      console.log("✅ User chose to stay logged in");
-    });
-
-    confirmAutoLogoutBtn.addEventListener("click", () => {
-      performAutoLogout();
-      console.log("✅ User chose to logout immediately");
-    });
-
     startBtnEl.addEventListener("click", () => {
       const dropdownVal = topicSelectEl.value;
       
@@ -4295,11 +4024,15 @@
       console.log("- Admin Quiz Notifications:", ADMIN_CONFIG.NOTIFY_ON_QUIZ_RESULT);
       console.log("- Classes Loaded:", CLASSES_CONFIG.length);
       console.log("- Session Persistence: Enabled");
-      console.log("- Auto-logout: 10 minutes inactivity with 10-second warning");
+      console.log("- Inactivity Timeout:", INACTIVITY_TIMEOUT / 60000, "minutes");
       
+      // Add event listeners for activity tracking
       document.addEventListener('mousemove', resetInactivityTimer);
       document.addEventListener('keypress', resetInactivityTimer);
       document.addEventListener('click', resetInactivityTimer);
+      document.addEventListener('scroll', resetInactivityTimer);
+      document.addEventListener('touchstart', resetInactivityTimer);
+      document.addEventListener('touchmove', resetInactivityTimer);
       
       resetFailedAttempts();
     }
